@@ -16,7 +16,7 @@ function banner() {
 
 # Check dependencies and prompt for installation
 function check_dependencies() {
-    local dependencies=("curl" "xargs")
+    local dependencies=("curl" "xargs" "awk")
     local missing_deps=()
 
     for cmd in "${dependencies[@]}"; do
@@ -74,8 +74,8 @@ function enumerate() {
     # Start enumeration using xargs for parallel processing
     cat "$wordlist" | xargs -P "$threads" -I {} bash -c "
         response=\$(curl -s -o /dev/null -w \"%{http_code}:::%{size_download}\" \"$url/{}\");
-        status_code=\$(echo \"\$response\" | cut -d':::' -f1)
-        size=\$(echo \"\$response\" | cut -d':::' -f2)
+        status_code=\$(echo \"\$response\" | awk -F ':::' '{print \$1}')
+        size=\$(echo \"\$response\" | awk -F ':::' '{print \$2}')
 
         # Display only valid status codes and filter out small responses
         if [[ \"\$status_code\" =~ ^(200|301|302)$ && \$size -gt 100 ]]; then
