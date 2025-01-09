@@ -16,11 +16,10 @@ Dependency Management: Checks and installs missing dependencies automatically.
 
 ./dirEnum.sh
 
-===========================================
-              dirEnum v0.1                 
+              dirEnum v5.1                 
       The Most Reliable Directory Enum     
            Author: securitybong            
-===========================================
+
 
 [?] Please enter the target URL (e.g., http://example.com):
 
