@@ -59,6 +59,8 @@ function enumerate() {
     local threads="$3"
     local output="$4"
     local error_log="errors.log"
+    local total_lines=$(wc -l < "$wordlist")
+    local processed=0
 
     echo "[*] Starting enumeration on $url with $threads threads..."
     echo
@@ -72,8 +74,8 @@ function enumerate() {
     > "$error_log"
 
     # Start enumeration using xargs for parallel processing
-    cat "$wordlist" | xargs -P "$threads" -I {} bash -c "
-        response=\$(curl -s -o /dev/null -w \"%{http_code}:::%{size_download}\" \"$url/{}\");
+    cat "$wordlist" | xargs -d '\n' -P "$threads" -I {} bash -c "
+        response=\$(curl -s -o /dev/null --max-time 10 -w \"%{http_code}:::%{size_download}\" \"$url/{}\");
         status_code=\$(echo \"\$response\" | awk -F ':::' '{print \$1}')
         size=\$(echo \"\$response\" | awk -F ':::' '{print \$2}')
 
@@ -86,7 +88,11 @@ function enumerate() {
         else
             echo \"$url/{} (\$status_code, Size: \$size bytes)\" >> \"$error_log\"
         fi
-    "
+
+        # Progress tracking
+        processed=\$((processed + 1))
+        echo -ne \"[*] Processed: \$processed/\$total_lines\r\" >&2
+    " 2>/dev/null
 
     echo
     echo "[*] Enumeration completed."
